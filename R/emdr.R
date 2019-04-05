@@ -1,6 +1,7 @@
 #' emdr: Empirical mode decomposition based regression
 #'
-#' The \code{emdr} package provides functions to decompose time series
+#' The \code{emdr} package provides functions to decompose time series through
+#' empirical mode decomposition (EMD)
 #' and use the resulting components (called intrinsic mode functions, IMFs)
 #' in a regression analysis.
 #'
