@@ -159,7 +159,7 @@ print.summary.mimf <- function(x, ...)
 #'    plot(mimfs, select.var = "temp", col = "red")
 #'    plot(mimfs, select.var = "rhum", col = "blue")
 #'
-#' @export
+#' @export                                                 
 plot.mimf <- function(x, tt = NULL, select.var = NULL, select.imf = NULL, input = TRUE, input.lab = "X", imf.lab = NULL, grid = c("zeroline","complete","none"), grid.col = "lightgray", space = 1, ...)
 {
     grid <- match.arg(grid)

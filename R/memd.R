@@ -57,10 +57,16 @@
 #'    between the number of local extrema and zero-crossings is at most 1, for
 #'    \code{tol} steps. In this case, \code{tol} is a single integer value.
 #'
-#'    The function also implements the NA-MEMD algorithm. It consits in adding
-#'    \code{l} white noise variable to populate all frequencies. The 
-#'    amplitude of these variables is given by \code{wn.power} as the relative
-#'    standard deviation compared to the signal.
+#'    The function also includes the possibility to perform noise-assisted 
+#'    extensions to manage the mode-mixing issue. Ensemble EMD (EEMD) is
+#'    performed by setting the number of ensembles \code{Ne} higher than 1.
+#'    NA-MEMD is performed by setting the number of added white noise variables
+#'    \code{l} higher than 0. When both are given, the NA-MEMD is performed.
+#'    In all cases, the argument \code{wn.power} indicates the amplitude of
+#'    added white noise.
+#'
+#'    At the end, IMFs with similar frequencies can be obtained. They can be
+#'    summed using the function \code{\link{combine.mimf}}.
 #'
 #' @return An object of class \code{mimf}, i.e an array with dimension 
 #'    \emph{nindividuals} x \emph{nimfs} x \emph{nvariables}. In addition, 
@@ -89,19 +95,23 @@
 #' @examples
 #'    library(dlnm)
 #'    
-#'    # Decompose both temperature and relative humidity with NA-MEMD
-#'    # Adding two noise variables 
 #'    X <- chicagoNMMAPS[,c("temp", "rhum")]
 #'    set.seed(3)
-#'    mimfs <- memd(X, l = 2) # Takes a couple of minutes
+#'    
+#'    # EMD
+#'    imfs <- memd(X[,1])
 #'
-#'    # Plot resulting IMFs
-#'    plot(mimfs)
+#'    # EEMD
+#'    imfs <- memd(X[,1], Ne = 100, wn.power = .05)
+#'    
+#'    # MEMD
+#'    imfs <- memd(X) # Takes a couple of minutes
+#'    
+#'    # NA-MEMD
+#'    imfs <- memd(X, l = 2, wn.power = .02) # Takes a couple of minutes
 #'
-#'    # Sum MIMFs with similar frequencies
-#'    cmimfs <- combine.mimf(mimfs, list(11:12, 13:19, 20:21), 
-#'      new.names = c("C11", "C12", "r"))
-#'    plot(cmimfs)
+#'    # Plot resulting (M)IMFs
+#'    plot(imfs)
 #'
 #' @export
 memd <- function(x, tt = 1:nrow(x), ndirections = 64, 
@@ -119,22 +129,23 @@ memd <- function(x, tt = 1:nrow(x), ndirections = 64,
     p <- ncol(x)
     # Standardization of variables
     Xsc <- scale(x)
-    if (l<=0) Ne <- 1
     mimfs <- array(NA,dim=c(n,2*log2(n),p+l,Ne))
     imfcount <- vector("numeric",Ne)
     #siftcounts <- vector("list",Ne)
     siftcounts <- vector("list",2*log2(n))
-    totaltime <- 0 # pour calculer le temps nécessaire
-    timedeb <- Sys.time()
     for (e in 1:Ne){
-        # Addition of white noise variables (adds nothing if l==0)
+        # Addition of white noise variables 
         if (l > 0){
-          wn <- matrix(stats::rnorm(n*l,0,wn.power),ncol=l)
-          Xwn <- cbind(Xsc,wn)
+          wn <- matrix(stats::rnorm(n*l,0,wn.power), ncol = l)
+          Xwn <- cbind(Xsc, wn)
         } else {
-          Xwn <- Xsc
+          if (Ne > 1){
+            wn <- matrix(stats::rnorm(n * p,0,wn.power), ncol = p)
+            Xwn <- Xsc + wn
+          } else {
+            Xwn <- Xsc
+          }
         }
-        
         #--- MEMD decomposition -------  
         #Hammersley sequence for projections
         if (p+l > 1){
@@ -161,15 +172,13 @@ memd <- function(x, tt = 1:nrow(x), ndirections = 64,
         for (j in 1:p) mimfs[,,j,e] <- mimfs[,,j,e] * attr(Xsc,"scaled:scale")[j]
         mimfs[,2*log2(n),1:p,e] <- mimfs[,2*log2(n),1:p,e] + matrix(attr(Xsc,"scaled:center"),n,p,byrow=T)
         if (Ne>1){
-           totaltime <- as.numeric(Sys.time()) - as.numeric(timedeb)
            print(sprintf("Ensemble %i / %i",e,Ne))
-           print(sprintf("Estimated remaining time: %f minutes", (Ne-e) * totaltime/(e*60)))
            utils::flush.console()
         }
     }
     # Aggregating of all mimfs found
     nmimfs <- max(imfcount)
-    mimfs <- mimfs[,c(1:nmimfs,2*log2(n)),1:p,]
+    mimfs <- mimfs[,c(1:nmimfs,2*log2(n)),1:p,, drop = F]
     if (Ne > 1){
     #  finalmimfs <- array(0,c(n,p+l,nmimfs+1))
     #  for (e in 1:Ne){
@@ -181,7 +190,7 @@ memd <- function(x, tt = 1:nrow(x), ndirections = 64,
     #  finalmimfs[,,nmimfs+1] <- finalmimfs[,,nmimfs+1] / nmimfs 
       finalmimfs <- apply(mimfs,c(1,2,3),mean,na.rm=T)
     } else {
-      finalmimfs <- mimfs
+      finalmimfs <- drop(mimfs)
     }
     dimnames(finalmimfs) <- list(NULL,c(sprintf("C%s",1:(dim(finalmimfs)[2]-1)),"r"))
     if (p > 1) dimnames(finalmimfs)[[3]] <- colnames(x)

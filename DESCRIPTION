@@ -10,7 +10,7 @@ LazyData: true
 Suggests: testthat,
     dlnm,
     glmnet
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Imports: spatstat,
     randtoolbox,
     grDevices,

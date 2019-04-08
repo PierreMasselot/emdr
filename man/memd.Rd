@@ -87,27 +87,37 @@ The EMD algorithm iteratively estimates IMF beginning with the
    between the number of local extrema and zero-crossings is at most 1, for
    \code{tol} steps. In this case, \code{tol} is a single integer value.
 
-   The function also implements the NA-MEMD algorithm. It consits in adding
-   \code{l} white noise variable to populate all frequencies. The 
-   amplitude of these variables is given by \code{wn.power} as the relative
-   standard deviation compared to the signal.
+   The function also includes the possibility to perform noise-assisted 
+   extensions to manage the mode-mixing issue. Ensemble EMD (EEMD) is
+   performed by setting the number of ensembles \code{Ne} higher than 1.
+   NA-MEMD is performed by setting the number of added white noise variables
+   \code{l} higher than 0. When both are given, the NA-MEMD is performed.
+   In all cases, the argument \code{wn.power} indicates the amplitude of
+   added white noise.
+
+   At the end, IMFs with similar frequencies can be obtained. They can be
+   summed using the function \code{\link{combine.mimf}}.
 }
 \examples{
    library(dlnm)
    
-   # Decompose both temperature and relative humidity with NA-MEMD
-   # Adding two noise variables 
    X <- chicagoNMMAPS[,c("temp", "rhum")]
    set.seed(3)
-   mimfs <- memd(X, l = 2) # Takes a couple of minutes
+   
+   # EMD
+   imfs <- memd(X[,1])
 
-   # Plot resulting IMFs
-   plot(mimfs)
+   # EEMD
+   imfs <- memd(X[,1], Ne = 100, wn.power = .05)
+   
+   # MEMD
+   imfs <- memd(X) # Takes a couple of minutes
+   
+   # NA-MEMD
+   imfs <- memd(X, l = 2, wn.power = .02) # Takes a couple of minutes
 
-   # Sum MIMFs with similar frequencies
-   cmimfs <- combine.mimf(mimfs, list(11:12, 13:19, 20:21), 
-     new.names = c("C11", "C12", "r"))
-   plot(cmimfs)
+   # Plot resulting (M)IMFs
+   plot(imfs)
 
 }
 \references{
