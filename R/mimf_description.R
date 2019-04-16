@@ -234,9 +234,21 @@ plot.mimf <- function(x, tt = NULL, select.var = NULL, select.imf = NULL, input 
         argsK <- lapply(argsMatplot, "[", i =k, j = )
         do.call(graphics::matplot,c(argsPlotK[!names(argsPlotK) %in% names(argsMatplot)],argsK))
         if ((!argsPlot$xaxt == "n") || is.null(argsPlot$xaxt)){
-           graphics::axis(3,labels=FALSE)                                      #! Prendre en compte possibilité de dates
-           graphics::axis(1,labels=FALSE)
-#           if (k == K) graphics::axis(1,labels=TRUE,tcl=-0.5)
+           if (inherits(tt, "Date")){
+             graphics::axis.Date(1, x = tt, labels = FALSE)
+             graphics::axis.Date(3, x = tt, labels = FALSE)
+             if (k == K) graphics::axis.Date(1, x = tt, tcl = -0.5)
+           } else {
+             if (inherits(tt, "POSIXt")){
+               graphics::axis.POSIXct(1, x = tt, labels = FALSE)
+               graphics::axis.POSIXct(3, x = tt, labels = FALSE)
+               if (k == K) graphics::axis.POSIXct(1, x = tt, tcl = -0.5)
+             } else {
+               graphics::axis(1, labels = FALSE)
+               graphics::axis(3, labels = FALSE)
+               if (k == K) graphics::axis(1, tcl = -0.5)
+             }
+           } 
            yaxp <- graphics::par("yaxp")
            if (yaxp[3] %% 2 == 1) yaxp[3] <- yaxp[3] - 1
            ytcks <- graphics::axTicks(2, axp = yaxp)
