@@ -44,10 +44,10 @@
 #'    
 #'    # Predictor decomposition
 #'    X <- chicagoNMMAPS[,c("temp", "rhum")]
-#'    set.seed(3)
+#'    set.seed(123)
 #'    mimfs <- memd(X, l = 2) # Takes a couple of minutes
-#'    cmimfs <- combine.mimf(mimfs, list(11:12, 13:19, 20:21), 
-#'      new.names = c("C11", "C12", "r"))
+#'    cmimfs <- combine.mimf(mimfs, list(10:11, 12:13), 
+#'      new.names = c("C10", "C11"))
 #'
 #'    # Response variable
 #'    Y <- chicagoNMMAPS$resp[attr(cmimfs, "tt")]
@@ -70,9 +70,8 @@
 #'    ## EMD-R2
 #'    dat <- chicagoNMMAPS[,c("death", "temp", "rhum")]
 #'
-#'    set.seed(3475)
-#'    mimfs <- memd(dat, l = 2, wn.power = .1)
-#'    cmimfs <- combine.mimf(mimfs, list(12:14, 15:19, 20:22), 
+#'    mimfs <- memd(dat)
+#'    cmimfs <- combine.mimf(mimfs, list(12:13, 14:17, 18:19), 
 #'      new.names = c("C12", "C13", "r"))
 #'
 #'    # EMD-R2 with glm
@@ -141,10 +140,10 @@ sensitivity <- function(amplitudes, model = NULL, coefs = NULL, ...)
 #'    
 #'    # Predictor decomposition
 #'    X <- chicagoNMMAPS[,c("temp", "rhum")]
-#'    set.seed(3)
+#'    set.seed(123)
 #'    mimfs <- memd(X, l = 2) # Takes a couple of minutes
-#'    cmimfs <- combine.mimf(mimfs, list(11:12, 13:19, 20:21), 
-#'      new.names = c("C11", "C12", "r"))
+#'    cmimfs <- combine.mimf(mimfs, list(10:11, 12:13), 
+#'      new.names = c("C10", "C11"))
 #'
 #'    # Response variable
 #'    Y <- chicagoNMMAPS$resp[attr(cmimfs, "tt")]
@@ -160,9 +159,9 @@ sensitivity <- function(amplitudes, model = NULL, coefs = NULL, ...)
 #'      family = "poisson")
 #'
 #'    # Compute sensitivity and plot results
-#'    amps <- mean_amplitude(dataR1[,2:27])
+#'    amps <- mean_amplitude(dataR1[,2:25])
 #'    betas <- coef(lasso.res)
-#'    s <- sensitivity(amps, coefs = betas[2:27]) 
+#'    s <- sensitivity(amps, coefs = betas[2:25]) 
 #'
 #'    plot_emdr(matrix(s, ncol = 2, byrow = FALSE), periods = period(cmimfs), 
 #'    show.coef = "nonzero", col = c("red", "blue"), pch = 16:17)
@@ -171,9 +170,8 @@ sensitivity <- function(amplitudes, model = NULL, coefs = NULL, ...)
 #'    ## EMD-R2
 #'    dat <- chicagoNMMAPS[,c("death", "temp", "rhum")]
 #'
-#'    set.seed(3475)
-#'    mimfs <- memd(dat, l = 2, wn.power = .1)
-#'    cmimfs <- combine.mimf(mimfs, list(12:14, 15:19, 20:22), 
+#'    mimfs <- memd(dat)
+#'    cmimfs <- combine.mimf(mimfs, list(12:13, 14:17, 18:19), 
 #'      new.names = c("C12", "C13", "r"))
 #'
 #'    # EMD-R2 with glm

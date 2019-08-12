@@ -47,10 +47,10 @@ The sensitivy term hereby designates regression coefficients
    
    # Predictor decomposition
    X <- chicagoNMMAPS[,c("temp", "rhum")]
-   set.seed(3)
+   set.seed(123)
    mimfs <- memd(X, l = 2) # Takes a couple of minutes
-   cmimfs <- combine.mimf(mimfs, list(11:12, 13:19, 20:21), 
-     new.names = c("C11", "C12", "r"))
+   cmimfs <- combine.mimf(mimfs, list(10:11, 12:13), 
+     new.names = c("C10", "C11"))
 
    # Response variable
    Y <- chicagoNMMAPS$resp[attr(cmimfs, "tt")]
@@ -73,9 +73,8 @@ The sensitivy term hereby designates regression coefficients
    ## EMD-R2
    dat <- chicagoNMMAPS[,c("death", "temp", "rhum")]
 
-   set.seed(3475)
-   mimfs <- memd(dat, l = 2, wn.power = .1)
-   cmimfs <- combine.mimf(mimfs, list(12:14, 15:19, 20:22), 
+   mimfs <- memd(dat)
+   cmimfs <- combine.mimf(mimfs, list(12:13, 14:17, 18:19), 
      new.names = c("C12", "C13", "r"))
 
    # EMD-R2 with glm

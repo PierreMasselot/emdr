@@ -29,6 +29,13 @@
 #' @param Ne Integer giving the ensemble number for EEMD.
 #' @param wn.power Numeric value > 0 giving the relative standard deviation of 
 #'    noise variables (see details).
+#' @param keep.noise Logical. If set to TRUE, the white noise channels created
+#'    by the algorithm are returned as well. Note that it is useful only
+#'    when \code{l > 0}.
+#' @param memd.stop Numeric value. The algorithm stops and consider that the
+#'     IMF has been reached when the number of extrema of the remaining
+#'      signal is below \code{memd.stop}. Note that in the multivariate case,
+#'       the number of extrema of all the projections must below this value.         
 #'
 #' @details The EMD algorithm iteratively estimates IMF beginning with the 
 #'    highest frequency to the lowest frequency. Each time an IMF is estimated,
@@ -69,12 +76,13 @@
 #'    summed using the function \code{\link{combine.mimf}}.
 #'
 #' @return An object of class \code{mimf}, i.e an array with dimension 
-#'    \emph{nindividuals} x \emph{nimfs} x \emph{nvariables}. In addition, 
+#'    \emph{nindividuals} x \emph{nimfs} x \emph{nvariables} which also 
 #'    contains the attributes:
 #'      \item{x}{The original multivariate signal.}
 #'      \item{tt}{The vector of time indices.}
 #'      \item{nb.iter}{A vector containing the number of sifting
-#'        iterations necessary to estimate each IMF.}
+#'        iterations necessary to estimate each IMF. If \code{Ne > 1},
+#'        a \code{Ne} x nimfs matrix.}
 #'      \item{call}{The function call.}
 #'
 #' @references 
@@ -116,7 +124,8 @@
 #' @export
 memd <- function(x, tt = 1:nrow(x), ndirections = 64, 
   stopping = c("absmean", "S"), tol = c(0.075, 0.075, 0.75), max.iter = 50, 
-  max.mimfs = NULL, l = 0, Ne = 1, wn.power = 0.02)
+  max.mimfs = NULL, l = 0, Ne = 1, wn.power = 0.02, keep.noise = FALSE, 
+  memd.stop = ifelse(p > 1, 3, 2))
 {
     if (is.data.frame(x)) x <- data.matrix(x)
     if (is.vector(x)) x <- matrix(x, ncol = 1)
@@ -129,18 +138,18 @@ memd <- function(x, tt = 1:nrow(x), ndirections = 64,
     p <- ncol(x)
     # Standardization of variables
     Xsc <- scale(x)
-    mimfs <- array(NA,dim=c(n,2*log2(n),p+l,Ne))
-    imfcount <- vector("numeric",Ne)
-    #siftcounts <- vector("list",Ne)
-    siftcounts <- vector("list",2*log2(n))
+    nimfs <- ifelse(is.null(max.mimfs), ceiling(2 * log2(n)), max.mimfs)
+    mimfs <- array(NA, dim = c(n, nimfs, p+l, Ne))
+    imfcount <- vector("numeric", Ne)
+    siftcounts <- matrix(NA, Ne, nimfs)
     for (e in 1:Ne){
         # Addition of white noise variables 
         if (l > 0){
-          wn <- matrix(stats::rnorm(n*l,0,wn.power), ncol = l)
+          wn <- matrix(stats::rnorm(n * l, 0, wn.power), ncol = l)
           Xwn <- cbind(Xsc, wn)
         } else {
           if (Ne > 1){
-            wn <- matrix(stats::rnorm(n * p,0,wn.power), ncol = p)
+            wn <- matrix(stats::rnorm(n * p, 0, wn.power), ncol = p)
             Xwn <- Xsc + wn
           } else {
             Xwn <- Xsc
@@ -148,55 +157,55 @@ memd <- function(x, tt = 1:nrow(x), ndirections = 64,
         }
         #--- MEMD decomposition -------  
         #Hammersley sequence for projections
-        if (p+l > 1){
-           projmat <- get.projections(ndirections,p+l)
+        if (p + l > 1){
+           projmat <- get.projections(ndirections, p + l)
         } else {
-           projmat <- diag(p+l)
+           projmat <- matrix(1)
         }
         R <- Xwn
         imfcount[e] <- 0
         repeat {
-              tostop <- compute.mean.enveloppe(R,tt,projmat) 
-              if(all(tostop$nex<2)) break     # <3 ?
-              if(!is.null(max.mimfs)) if(imfcount==max.mimfs) break 
-              siftp <- sifting(R,tt,projmat,stopping,tol,max.iter)
-              imfcount[e] <- imfcount[e]+1
-    #          mimfs[[e]] <- abind(mimfs[[e]],siftp$mimf,along=3)
+              tostop <- compute.mean.enveloppe(R, tt, projmat) 
+              if(all(tostop$nex < memd.stop)) break     
+              if(!is.null(max.mimfs)) if(imfcount == max.mimfs) break 
+              siftp <- sifting(R, tt, projmat, stopping, tol, max.iter)
+              imfcount[e] <- imfcount[e] + 1
+              if (imfcount[e] == nimfs){
+                mimfs <- abind::abind(mimfs[,-nimfs,,, drop = F], 
+                  array(NA ,dim=c(n, nimfs, p+l, Ne)), 
+                  mimfs[,nimfs,,, drop = F],
+                  along = 2)
+                siftcounts <- cbind(siftcounts, matrix(NA, Ne, nimfs))
+                nimfs <- 2 * nimfs
+              }
               mimfs[,imfcount[e],,e] <- siftp$mimf
-              siftcounts[[imfcount[e]]] <- c(siftcounts[[imfcount[e]]],siftp$count)
+              siftcounts[e, imfcount[e]] <- siftp$count
               R <- R - siftp$mimf
         }
-    #    mimfs[[e]] <- abind(mimfs[[e]],R,along=3)
-        mimfs[,2*log2(n),,e] <- R 
-    #    for (j in 1:p) mimfs[[e]][,j,] <- mimfs[[e]][,j,] * attr(Xsc,"scaled:scale")[j]
-        for (j in 1:p) mimfs[,,j,e] <- mimfs[,,j,e] * attr(Xsc,"scaled:scale")[j]
-        mimfs[,2*log2(n),1:p,e] <- mimfs[,2*log2(n),1:p,e] + matrix(attr(Xsc,"scaled:center"),n,p,byrow=T)
-        if (Ne>1){
+        mimfs[,nimfs,,e] <- R 
+        if (Ne > 1){
            print(sprintf("Ensemble %i / %i",e,Ne))
            utils::flush.console()
         }
     }
     # Aggregating of all mimfs found
     nmimfs <- max(imfcount)
-    mimfs <- mimfs[,c(1:nmimfs,2*log2(n)),1:p,, drop = F]
-    if (Ne > 1){
-    #  finalmimfs <- array(0,c(n,p+l,nmimfs+1))
-    #  for (e in 1:Ne){
-    #      mimftoadd <- if(imfcount[e]<nmimfs) abind(mimfs[[e]][,,1:imfcount[e]],array(0,c(n,p+l,nmimfs-imfcount[e]))) else mimfs[[e]][,,1:imfcount[e]]
-    #      mimftoadd <- abind(mimftoadd,mimfs[[e]][,,imfcount[e]+1,drop=F],along=3)
-    #      finalmimfs <- finalmimfs + mimftoadd
-    #  }
-    #  for (i in 1:nmimfs) finalmimfs[,,i] <- finalmimfs[,,i] / sum(imfcount>=i)
-    #  finalmimfs[,,nmimfs+1] <- finalmimfs[,,nmimfs+1] / nmimfs 
-      finalmimfs <- apply(mimfs,c(1,2,3),mean,na.rm=T)
-    } else {
-      finalmimfs <- drop(mimfs)
+    mimfs <- mimfs[,c(1:nmimfs, nimfs),,, drop = F]
+    if (!keep.noise) mimfs <- mimfs[,,1:p,, drop = F]
+    finalmimfs <- apply(mimfs,c(1,2,3), mean, na.rm = T)
+    for (j in 1:p){
+      finalmimfs[,,j] <- finalmimfs[,,j] * attr(Xsc,"scaled:scale")[j]
     }
-    dimnames(finalmimfs) <- list(NULL,c(sprintf("C%s",1:(dim(finalmimfs)[2]-1)),"r"))
-    if (p > 1) dimnames(finalmimfs)[[3]] <- colnames(x)
-    siftcounts <- siftcounts[!sapply(siftcounts,is.null)]
-    if (Ne==1) siftcounts <- unlist(siftcounts)
-    attributes(finalmimfs) <- c(attributes(finalmimfs),list(x = x, tt = tt, nb.iter = siftcounts, call = match.call()))
+    finalmimfs[,nmimfs + 1,1:p] <- finalmimfs[,nmimfs + 1,1:p] + 
+      matrix(attr(Xsc,"scaled:center"), n, p, byrow = T)
+    dimnames(finalmimfs) <- list(NULL, 
+      c(sprintf("C%s", 1:(dim(finalmimfs)[2]-1)), "r"),
+      colnames(x))
+    finalmimfs <- drop(finalmimfs)
+    siftcounts <- siftcounts[,1:nmimfs]
+    if (Ne == 1) siftcounts <- unlist(siftcounts)
+    attributes(finalmimfs) <- c(attributes(finalmimfs),
+      list(x = x, tt = tt, nb.iter = siftcounts, call = match.call()))
     class(finalmimfs) <- c("mimf","array")
     return(finalmimfs)
 }
@@ -250,13 +259,13 @@ sifting <- function(x, tt, projmat, stopping, tol, max.iter){
     count <- 0
     if (stopping == "S") stpcount <- 0 #for the S stopping criterion
     repeat {
-       menv <- compute.mean.enveloppe(hk,tt,projmat)       
+       menv <- compute.mean.enveloppe(hk, tt, projmat)       
        if (stopping == "absmean"){
           sx <- sqrt(rowSums(menv$meanenv^2)) / menv$amp
-          if (!(mean(sx>tol[1]) > tol[2] || any(sx>tol[3]))) break
+          if (!(mean(sx > tol[1]) > tol[2] || any(sx > tol[3]))) break
        }
        if (stopping == "S"){
-          if (any(abs(menv$nex-menv$nzc)<=1)){
+          if (any(abs(menv$nex - menv$nzc) <= 1)){
              stpcount <- stpcount + 1
           } else {
              stpcount <- 0
@@ -267,7 +276,7 @@ sifting <- function(x, tt, projmat, stopping, tol, max.iter){
        hk <- hk - menv$meanenv
        count <- count + 1   
     }
-    return(list(mimf=hk,count=count)) 
+    return(list(mimf = hk, count = count)) 
 }
 
 #' @rdname get.projections

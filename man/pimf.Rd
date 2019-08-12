@@ -50,10 +50,10 @@ Prepare a data.frame to be used in a regression function for EMD-R1,
    
    # Predictor decomposition
    X <- chicagoNMMAPS[,c("temp", "rhum")]
-   set.seed(3)
+   set.seed(123)
    mimfs <- memd(X, l = 2) # Takes a couple of minutes
-   cmimfs <- combine.mimf(mimfs, list(11:12, 13:19, 20:21), 
-     new.names = c("C11", "C12", "r"))
+   cmimfs <- combine.mimf(mimfs, list(10:11, 12:13), 
+     new.names = c("C10", "C11"))
 
    # Response variable
    Y <- chicagoNMMAPS$resp[attr(cmimfs, "tt")]
@@ -69,9 +69,9 @@ Prepare a data.frame to be used in a regression function for EMD-R1,
      family = "poisson")
 
    # Compute sensitivity and plot results
-   amps <- mean_amplitude(dataR1[,2:27])
+   amps <- mean_amplitude(dataR1[,2:25])
    betas <- coef(lasso.res)
-   s <- sensitivity(amps, coefs = betas[2:27]) 
+   s <- sensitivity(amps, coefs = betas[2:25]) 
    plot_emdr(matrix(s, ncol = 2, byrow = FALSE), periods = period(cmimfs), 
    show.coef = "nonzero", col = c("red", "blue"), pch = 16:17)
    abline(h = 0, lty = 2)

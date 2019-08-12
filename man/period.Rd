@@ -59,10 +59,10 @@ mean_amplitude(object, tt = attr(object, "tt"))
    # Decompose both temperature and relative humidity with NA-MEMD
    # Adding two noise variables 
    X <- chicagoNMMAPS[,c("temp", "rhum")]
-   set.seed(3)
+   set.seed(123)
    mimfs <- memd(X, l = 2) # Takes a couple of minutes
-   cmimfs <- combine.mimf(mimfs, list(11:12, 13:19, 20:21), 
-     new.names = c("C11", "C12", "r"))
+   cmimfs <- combine.mimf(mimfs, list(10:11, 12:13), 
+     new.names = c("C10", "C11"))
 
    summary(cmimfs)
 

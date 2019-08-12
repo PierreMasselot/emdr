@@ -7,7 +7,7 @@
 \method{plot}{mimf}(x, tt = NULL, select.var = NULL,
   select.imf = NULL, input = TRUE, input.lab = "X", imf.lab = NULL,
   grid = c("zeroline", "complete", "none"), grid.col = "lightgray",
-  space = 1, ...)
+  space = 1, add.legend = p > 1, legend.pars = list(), ...)
 }
 \arguments{
 \item{x}{\code{mimf} x or array to plot.}
@@ -36,6 +36,13 @@ and "none" draws no grid at all.}
 \item{grid.col}{The grid color.}
 
 \item{space}{Numeric value giving the margin between two panels in the plot.}
+
+\item{add.legend}{Logical value. If TRUE (the default) a legend is
+automatically drawn at the top of the plot.}
+
+\item{legend.pars}{List of optional parameters for the legend.
+Can be useful to indicate custom names for the variables for instance.
+See \code{\link[graphics]{legend}}.}
 
 \item{...}{Other graphical parameters. See 
 \code{\link[graphics]{par}}.}

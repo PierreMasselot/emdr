@@ -6,7 +6,8 @@
 \usage{
 memd(x, tt = 1:nrow(x), ndirections = 64, stopping = c("absmean",
   "S"), tol = c(0.075, 0.075, 0.75), max.iter = 50, max.mimfs = NULL,
-  l = 0, Ne = 1, wn.power = 0.02)
+  l = 0, Ne = 1, wn.power = 0.02, keep.noise = FALSE,
+  memd.stop = ifelse(p > 1, 3, 2))
 }
 \arguments{
 \item{x}{A numeric matrix containing the multivariate signal. Each column 
@@ -43,15 +44,25 @@ for the noise-assisted MEMD.}
 
 \item{wn.power}{Numeric value > 0 giving the relative standard deviation of 
 noise variables (see details).}
+
+\item{keep.noise}{Logical. If set to TRUE, the white noise channels created
+by the algorithm are returned as well. Note that it is useful only
+when \code{l > 0}.}
+
+\item{memd.stop}{Numeric value. The algorithm stops and consider that the
+IMF has been reached when the number of extrema of the remaining
+ signal is below \code{memd.stop}. Note that in the multivariate case,
+  the number of extrema of all the projections must below this value.}
 }
 \value{
 An object of class \code{mimf}, i.e an array with dimension 
-   \emph{nindividuals} x \emph{nimfs} x \emph{nvariables}. In addition, 
+   \emph{nindividuals} x \emph{nimfs} x \emph{nvariables} which also 
    contains the attributes:
      \item{x}{The original multivariate signal.}
      \item{tt}{The vector of time indices.}
      \item{nb.iter}{A vector containing the number of sifting
-       iterations necessary to estimate each IMF.}
+       iterations necessary to estimate each IMF. If \code{Ne > 1},
+       a \code{Ne} x nimfs matrix.}
      \item{call}{The function call.}
 }
 \description{

@@ -39,10 +39,10 @@
 #'    # Decompose both temperature and relative humidity with NA-MEMD
 #'    # Adding two noise variables 
 #'    X <- chicagoNMMAPS[,c("temp", "rhum")]
-#'    set.seed(3)
+#'    set.seed(123)
 #'    mimfs <- memd(X, l = 2) # Takes a couple of minutes
-#'    cmimfs <- combine.mimf(mimfs, list(11:12, 13:19, 20:21), 
-#'      new.names = c("C11", "C12", "r"))
+#'    cmimfs <- combine.mimf(mimfs, list(10:11, 12:13), 
+#'      new.names = c("C10", "C11"))
 #'
 #'    summary(cmimfs)
 #'
@@ -136,6 +136,11 @@ print.summary.mimf <- function(x, ...)
 #'    and "none" draws no grid at all.
 #' @param grid.col The grid color.
 #' @param space Numeric value giving the margin between two panels in the plot.
+#' @param add.legend Logical value. If TRUE (the default) a legend is
+#'    automatically drawn at the top of the plot.
+#' @param legend.pars List of optional parameters for the legend.
+#'    Can be useful to indicate custom names for the variables for instance.
+#'    See \code{\link[graphics]{legend}}.
 #' @param ... Other graphical parameters. See 
 #'    \code{\link[graphics]{par}}.
 #' 
@@ -160,7 +165,10 @@ print.summary.mimf <- function(x, ...)
 #'    plot(mimfs, select.var = "rhum", col = "blue")
 #'
 #' @export                                                 
-plot.mimf <- function(x, tt = NULL, select.var = NULL, select.imf = NULL, input = TRUE, input.lab = "X", imf.lab = NULL, grid = c("zeroline","complete","none"), grid.col = "lightgray", space = 1, ...)
+plot.mimf <- function(x, tt = NULL, select.var = NULL, select.imf = NULL, 
+  input = TRUE, input.lab = "X", imf.lab = NULL, 
+  grid = c("zeroline","complete","none"), grid.col = "lightgray", 
+  space = 1, add.legend = p > 1, legend.pars = list(), ...)
 {
     grid <- match.arg(grid)
     stopifnot(inherits(x,c("matrix","array")))
@@ -191,30 +199,54 @@ plot.mimf <- function(x, tt = NULL, select.var = NULL, select.imf = NULL, input 
     }
     dots <- list(...)
     checkLPar <- function(param){
-         if (inherits(param,"matrix")){
-            if (all(dim(param) == c(p,K))){
-               outparam <- t(param)
-            } else {
-               if (all(dim(param) == c(K,p))){
-                  outparam <- param
-               } else {
-                  stop(sprintf("Dimension of the matrix provided to parameter %s do not fit number of IMFs to plot",deparse(substitute(param)))) 
-               }
-            }            
-         } else {
-            if (length(param) == K) outparam <- matrix(param,K,p)
-            if (length(param) == p) outparam <- matrix(param,K,p,byrow=T)
-            if (!length(param) %in% c(p,K)) outparam <- matrix(rep_len(param,p),K,p,byrow=T)
-         }
-         return(outparam)     
+       if (inherits(param,"matrix")){
+          if (all(dim(param) == c(p,K))){
+             outparam <- t(param)
+          } else {
+             if (all(dim(param) == c(K,p))){
+                outparam <- param
+             } else {
+                stop(sprintf("Dimension of the matrix provided to parameter %s do not fit number of IMFs to plot",deparse(substitute(param)))) 
+             }
+          }            
+       } else {
+          if (length(param) == K) outparam <- matrix(param,K,p)
+          if (length(param) == p) outparam <- matrix(param,K,p,byrow=T)
+          if (!length(param) %in% c(p,K)){
+            outparam <- matrix(rep_len(param,p),K,p,byrow=T)
+          }
+       }
+       return(outparam)     
     }
-    argsMatplot <- dots[names(dots) %in% c("type","lty","lend","pch","col","cex","lwd")]
-    argsMatplot <- lapply(argsMatplot,checkLPar)    
+    argsMatplotDots <- dots[names(dots) %in% 
+      c("type","lty","lend","pch","col","cex","lwd")]
+    argsMatplot <- lapply(argsMatplotDots, checkLPar)    
     argsPlot <- dots[names(dots) %in% setdiff(unique(names(c(formals(graphics::plot.default),formals(graphics::plot.xy)))),names(argsMatplot))]
     argsPar <- dots[names(dots) %in% setdiff(names(graphics::par()),c(names(argsPlot),names(argsMatplot)))]
-    defPar <- list(mfrow = c(K,1), oma = c(max(5-space,0),4,4,2) + .1, mar = c(space,0,0,0), tcl = 0.5)
+    defPar <- list(mfrow = c(K + add.legend,1), 
+      oma = c(max(5-space,0),4,4,2) + .1, 
+      mar = c(space,0,0,0), tcl = 0.5)
     argsPar <- c(argsPar, defPar[!names(defPar) %in% names(argsPar)])
     do.call(graphics::par,argsPar)
+    if (add.legend){
+      graphics::plot.new()
+      if(is.null(dimnames(x)[[3]])){
+        legnames <- sprintf("V%i", 1:p)
+      } else {
+        legnames <- dimnames(x)[[3]]
+      }
+      defLeg <- list(x = "bottom", legend = legnames, col = 1:6, lty = 1:5,
+        xpd = NA, ncol = ceiling(p * graphics::strheight(legnames[1])))
+      if (length(argsMatplotDots) > 0){
+        legend.pars <- c(legend.pars, 
+          argsMatplotDots[names(argsMatplotDots) %in% 
+            names(formals(graphics::legend))]
+        )
+      }
+      legend.pars <- c(legend.pars, 
+        defLeg[!names(defLeg) %in% names(legend.pars)])
+      do.call(graphics::legend, legend.pars)
+    }
     for (k in 1:K){
         argsPlotK <- within(argsPlot,{
             y <- mimfs[,k,]
@@ -231,8 +263,9 @@ plot.mimf <- function(x, tt = NULL, select.var = NULL, select.imf = NULL, input 
             else if (!exists("xlab")) xlab <- "tt"
             main <- ""            
         })
-        argsK <- lapply(argsMatplot, "[", i =k, j = )
-        do.call(graphics::matplot,c(argsPlotK[!names(argsPlotK) %in% names(argsMatplot)],argsK))
+        argsK <- lapply(argsMatplot, "[", i = k, j = )
+        do.call(graphics::matplot, 
+          c(argsPlotK[!names(argsPlotK) %in% names(argsMatplot)],argsK))
         if ((!argsPlot$xaxt == "n") || is.null(argsPlot$xaxt)){
            if (inherits(tt, "Date")){
              graphics::axis.Date(1, x = tt, labels = FALSE)
@@ -289,15 +322,15 @@ plot.mimf <- function(x, tt = NULL, select.var = NULL, select.imf = NULL, input 
 #'    # Decompose both temperature and relative humidity with NA-MEMD
 #'    # Adding two noise variables 
 #'    X <- chicagoNMMAPS[,c("temp", "rhum")]
-#'    set.seed(3)
+#'    set.seed(123)
 #'    mimfs <- memd(X, l = 2) # Takes a couple of minutes
 #'
 #'    # Plot resulting IMFs
 #'    plot(mimfs)
 #'
 #'    # Sum MIMFs with similar frequencies
-#'    cmimfs <- combine.mimf(mimfs, list(11:12, 13:19, 20:21), 
-#'      new.names = c("C11", "C12", "r"))
+#'    cmimfs <- combine.mimf(mimfs, list(10:11, 12:13), 
+#'      new.names = c("C10", "C11"))
 #'    plot(cmimfs)
 #' 
 #' @export 

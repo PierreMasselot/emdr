@@ -51,9 +51,8 @@
 #'
 #'    dat <- chicagoNMMAPS[,c("death", "temp", "rhum")]
 #'
-#'    set.seed(3475)
-#'    mimfs <- memd(dat, l = 2, wn.power = .1)
-#'    cmimfs <- combine.mimf(mimfs, list(12:14, 15:19, 20:22), 
+#'    mimfs <- memd(dat)
+#'    cmimfs <- combine.mimf(mimfs, list(12:13, 14:17, 18:19), 
 #'      new.names = c("C12", "C13", "r"))
 #'    amps <- mean_amplitude(cmimfs)
 #'
@@ -128,9 +127,8 @@ emdr2 <- function(formula, mimf, covariates = NULL, tt = attr(mimf,"tt"), reg.fu
 #'
 #'    dat <- chicagoNMMAPS[,c("death", "temp", "rhum")]
 #'
-#'    set.seed(3475)
-#'    mimfs <- memd(dat, l = 2, wn.power = .1)
-#'    cmimfs <- combine.mimf(mimfs, list(12:14, 15:19, 20:22), 
+#'    mimfs <- memd(dat)
+#'    cmimfs <- combine.mimf(mimfs, list(12:13, 14:17, 18:19), 
 #'      new.names = c("C12", "C13", "r"))
 #'
 #'    lm.R2 <- emdr2(death ~ temp + rhum, mimf = cmimfs)
@@ -197,9 +195,8 @@ coef.emdr2 <- function(object, method = "coef", ...)
 #'
 #'    dat <- chicagoNMMAPS[,c("death", "temp", "rhum")]
 #'
-#'    set.seed(3475)
-#'    mimfs <- memd(dat, l = 2, wn.power = .1)
-#'    cmimfs <- combine.mimf(mimfs, list(12:14, 15:19, 20:22), 
+#'    mimfs <- memd(dat)
+#'    cmimfs <- combine.mimf(mimfs, list(12:13, 14:17, 18:19), 
 #'      new.names = c("C12", "C13", "r"))
 #'
 #'    lm.R2 <- emdr2(death ~ temp + rhum, mimf = cmimfs)
