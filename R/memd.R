@@ -191,7 +191,17 @@ memd <- function(x, tt = 1:nrow(x), ndirections = 64,
     # Aggregating of all mimfs found
     nmimfs <- max(imfcount)
     mimfs <- mimfs[,c(1:nmimfs, nimfs),,, drop = F]
-    if (!keep.noise) mimfs <- mimfs[,,1:p,, drop = F]
+    if (!keep.noise){
+      mimfs <- mimfs[,,1:p,, drop = F]
+      varnames <- colnames(x)
+    } else {
+      if (is.null(colnames(x))){
+        varnames <- sprintf("V%i", 1:p)
+      } else {
+        varnames <- colnames(x)
+      }
+      varnames <- c(varnames, sprintf("noise%i", 1:l))
+    }
     finalmimfs <- apply(mimfs,c(1,2,3), mean, na.rm = T)
     for (j in 1:p){
       finalmimfs[,,j] <- finalmimfs[,,j] * attr(Xsc,"scaled:scale")[j]
@@ -200,7 +210,7 @@ memd <- function(x, tt = 1:nrow(x), ndirections = 64,
       matrix(attr(Xsc,"scaled:center"), n, p, byrow = T)
     dimnames(finalmimfs) <- list(NULL, 
       c(sprintf("C%s", 1:(dim(finalmimfs)[2]-1)), "r"),
-      colnames(x))
+      varnames)
     finalmimfs <- drop(finalmimfs)
     siftcounts <- siftcounts[,1:nmimfs]
     if (Ne == 1) siftcounts <- unlist(siftcounts)

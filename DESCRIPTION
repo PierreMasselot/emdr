@@ -1,6 +1,6 @@
 Package: emdr
 Title: Tools for EMD-regression
-Version: 1.2.1
+Version: 1.2.2
 Authors@R: person("Pierre", "Masselot", email = "pierre.masselot@ete.inrs.ca.com", role = c("aut", "cre"))
 Description: Functions to perform noise-assisted multivariate EMD and use the resulting IMFs in regression models. Includes plotting methods as well as tools to prepare IMFs being used in external regression models.
 Depends: R (>= 3.5.0)
@@ -9,7 +9,8 @@ Encoding: UTF-8
 LazyData: true
 Suggests: 
     dlnm,
-    glmnet
+    glmnet,
+	testthat
 RoxygenNote: 6.1.1
 Imports: 
     spatstat,

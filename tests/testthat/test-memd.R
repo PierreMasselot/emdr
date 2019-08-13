@@ -45,5 +45,5 @@ test_that("memd.stop has an effect", {
   nextr <- apply(res[,dim(res)[2],], 2, function(x){
     sum(find.extrema(x)$nextrema)
   })
-  expect_equal(sum(nextr >= 3), 0)
+  expect_equal(sum(nextr > 3), 0)
 })
