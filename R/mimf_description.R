@@ -149,6 +149,12 @@ print.summary.mimf <- function(x, ...)
 #'    To obtain the true amplitude of each variable, they must be plotted
 #'    separately.
 #'
+#'    If noise channel are present in the signal, i.e. if the argument
+#'    \code{keep.noise = TRUE} in \code{\link[emdr]{memd}},
+#'    they are not displayed by default. To display them, the argument 
+#'    \code{select.var} must be set manually. Note that, in this case, it
+#'    automatically set the argument \code{input} to \code{FALSE}.
+#'
 #' @examples
 #'    library(dlnm)
 #'    
@@ -177,11 +183,16 @@ plot.mimf <- function(x, tt = NULL, select.var = NULL, select.imf = NULL,
        dim(x) <- c(dim(x),1)
        dimnames(x) <- c(dm,list(NULL))
     } 
-    if (is.null(select.var)) select.var <- 1:dim(x)[3]
+    if (is.null(select.var)){
+      select.var <- 1:ncol(attr(x,"x"))
+    }
+    if (any(select.var > ncol(attr(x,"x")))){
+      input <- FALSE
+    } 
+    p <- length(select.var)
     if (is.null(select.imf)) select.imf <- 1:dim(x)[2]
     n <- dim(x)[1]
     K <- length(select.imf)
-    p <- length(select.var)
     if (is.null(tt)){
        tt <- if (inherits(x,"mimf")) attr(x,"tt") else 1:n
     }
@@ -233,7 +244,7 @@ plot.mimf <- function(x, tt = NULL, select.var = NULL, select.imf = NULL,
       if(is.null(dimnames(x)[[3]])){
         legnames <- sprintf("V%i", 1:p)
       } else {
-        legnames <- dimnames(x)[[3]]
+        legnames <- dimnames(x)[[3]][select.var]
       }
       defLeg <- list(x = "bottom", legend = legnames, col = 1:6, lty = 1:5,
         xpd = NA, ncol = ceiling(p * graphics::strheight(legnames[1])))

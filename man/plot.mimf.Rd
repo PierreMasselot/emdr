@@ -55,6 +55,12 @@ One panel is drawn for each IMF. In the multivariate case,
    by default all IMF's variables are scaled and displayed on the same panel.
    To obtain the true amplitude of each variable, they must be plotted
    separately.
+
+   If noise channel are present in the signal, i.e. if the argument
+   \code{keep.noise = TRUE} in \code{\link[emdr]{memd}},
+   they are not displayed by default. To display them, the argument 
+   \code{select.var} must be set manually. Note that, in this case, it
+   automatically set the argument \code{input} to \code{FALSE}.
 }
 \examples{
    library(dlnm)
