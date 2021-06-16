@@ -5,8 +5,13 @@
 \alias{print.imftest}
 \title{IMF significance test}
 \usage{
-imf.test(object, tt = NULL, type = c("wu", "flandrin"),
-  alternative = c("one.sided", "two.sided"), H = 0.5)
+imf.test(
+  object,
+  tt = NULL,
+  type = c("wu", "flandrin"),
+  alternative = c("one.sided", "two.sided"),
+  H = 0.5
+)
 
 \method{print}{imftest}(x, digits = 3, ...)
 }

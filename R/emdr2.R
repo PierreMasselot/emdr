@@ -46,6 +46,7 @@
 #'    612, 1018-1029. 
 #'
 #' @examples
+#'  
 #'    library(dlnm)
 #'    library(glmnet)
 #'
@@ -72,6 +73,7 @@
 #'    plot_emdr(sensitivity.R2, periods = period(cmimfs)[,-1], 
 #'      show.coef = "nonzero", pch = 16:17)
 #'    abline(h = 0, lty = 2)
+#'  
 #'
 #' @export
 emdr2 <- function(formula, mimf, covariates = NULL, tt = attr(mimf,"tt"), reg.fun = "glm", reg.args = list(), pimf.args = list(), xy.args = c("x", "y"))

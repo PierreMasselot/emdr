@@ -108,7 +108,7 @@
 #'    
 #'    # EMD
 #'    imfs <- memd(X[,1])
-#'
+#'    
 #'    # EEMD
 #'    imfs <- memd(X[,1], Ne = 100, wn.power = .05)
 #'    
@@ -117,15 +117,15 @@
 #'    
 #'    # NA-MEMD
 #'    imfs <- memd(X, l = 2, wn.power = .02) # Takes a couple of minutes
-#'
+#'    
 #'    # Plot resulting (M)IMFs
 #'    plot(imfs)
 #'
 #' @export
-memd <- function(x, tt = 1:nrow(x), ndirections = 64, 
+memd <- function(x, tt = 1:NROW(x), ndirections = 64, 
   stopping = c("absmean", "S"), tol = c(0.075, 0.075, 0.75), max.iter = 50, 
   max.mimfs = NULL, l = 0, Ne = 1, wn.power = 0.02, keep.noise = FALSE, 
-  memd.stop = ifelse(p > 1, 3, 2))
+  memd.stop = ifelse(p + l > 1, 3, 2))
 {
     if (is.data.frame(x)) x <- data.matrix(x)
     if (is.vector(x)) x <- matrix(x, ncol = 1)
@@ -233,7 +233,7 @@ memd <- function(x, tt = 1:nrow(x), ndirections = 64,
 #' @return \code{get.projections}: a \code{ndirection} x \code{p} matrix giving 
 #'    the projection vectors.
 get.projections <- function(ndirections, p){
-    hammseq <- spatstat::Hammersley(ndirections,rev(randtoolbox::get.primes(p-1)),raw=T)
+    hammseq <- spatstat.geom::Hammersley(ndirections,rev(randtoolbox::get.primes(p-1)),raw=T)
     b <- 2*hammseq-1
     tht <- atan2(sqrt(as.matrix(apply(b[,1:(p-1),drop=F]^2,1,cumsum))[,(p-1):1,drop=F]),b[,p:2,drop=F])
     dir.vec <- cbind(rep(1,ndirections),matrix(apply(tht,1,function(x)cumprod(sin(x))),ncol=p-1))
@@ -349,7 +349,7 @@ find.extrema <- function(x){
     # when consecutive points have the same value, keep only one (the one on the middle)
     adoub <- which(diff(x) != 0)
     inddoub <- which(diff(adoub) != 1) + 1
-    d <- adoub[inddoub] - adoub[inddoub-1]
+    d <- adoub[inddoub] - adoub[inddoub - 1]
     adoub[inddoub] <- adoub[inddoub] - floor(d/2)
     adoub <- c(adoub,n)
     x1 <- x[adoub]
@@ -359,7 +359,7 @@ find.extrema <- function(x){
     indmax <- adoub[which(d2x < 0) + 1]
     nextr <- c(length(indmin),length(indmax))
     names(nextr) <- c("nmin","nmax")
-    return(list(indmin=indmin,indmax=indmax,nextrema=nextr))
+    return(list(indmin = indmin, indmax = indmax, nextrema = nextr))
 }
 
 #' @rdname find.extrema

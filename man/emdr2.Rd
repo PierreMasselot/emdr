@@ -4,9 +4,16 @@
 \alias{emdr2}
 \title{EMD-R2}
 \usage{
-emdr2(formula, mimf, covariates = NULL, tt = attr(mimf, "tt"),
-  reg.fun = "glm", reg.args = list(), pimf.args = list(),
-  xy.args = c("x", "y"))
+emdr2(
+  formula,
+  mimf,
+  covariates = NULL,
+  tt = attr(mimf, "tt"),
+  reg.fun = "glm",
+  reg.args = list(),
+  pimf.args = list(),
+  xy.args = c("x", "y")
+)
 }
 \arguments{
 \item{formula}{A formula describing the models to be fit for each MIMF.}
@@ -53,6 +60,7 @@ Performs EMD-R2 by using the given regression function in each MIMF.
    in \code{xy.args}.
 }
 \examples{
+ 
    library(dlnm)
    library(glmnet)
 
@@ -79,6 +87,7 @@ Performs EMD-R2 by using the given regression function in each MIMF.
    plot_emdr(sensitivity.R2, periods = period(cmimfs)[,-1], 
      show.coef = "nonzero", pch = 16:17)
    abline(h = 0, lty = 2)
+ 
 
 }
 \references{

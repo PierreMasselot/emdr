@@ -4,8 +4,15 @@
 \alias{pimf}
 \title{EMD-R1 preparation}
 \usage{
-pimf(x, y, covariates = NULL, tt = attr(x, "tt"), lag = NA,
-  lag.max = 0.5, fill.na = FALSE)
+pimf(
+  x,
+  y,
+  covariates = NULL,
+  tt = attr(x, "tt"),
+  lag = NA,
+  lag.max = 0.5,
+  fill.na = FALSE
+)
 }
 \arguments{
 \item{x}{\code{mimf} object to be prepared for regression.}
@@ -46,6 +53,7 @@ Prepare a data.frame to be used in a regression function for EMD-R1,
    including the predictors MIMF and the response.
 }
 \examples{
+
    library(dlnm)
    
    # Predictor decomposition
@@ -75,6 +83,7 @@ Prepare a data.frame to be used in a regression function for EMD-R1,
    plot_emdr(matrix(s, ncol = 2, byrow = FALSE), periods = period(cmimfs), 
    show.coef = "nonzero", col = c("red", "blue"), pch = 16:17)
    abline(h = 0, lty = 2)
+ 
 
 }
 \references{

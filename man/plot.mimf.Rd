@@ -4,10 +4,21 @@
 \alias{plot.mimf}
 \title{Plot IMFs}
 \usage{
-\method{plot}{mimf}(x, tt = NULL, select.var = NULL,
-  select.imf = NULL, input = TRUE, input.lab = "X", imf.lab = NULL,
-  grid = c("zeroline", "complete", "none"), grid.col = "lightgray",
-  space = 1, add.legend = p > 1, legend.pars = list(), ...)
+\method{plot}{mimf}(
+  x,
+  tt = NULL,
+  select.var = NULL,
+  select.imf = NULL,
+  input = TRUE,
+  input.lab = "X",
+  imf.lab = NULL,
+  grid = c("zeroline", "complete", "none"),
+  grid.col = "lightgray",
+  space = 1,
+  add.legend = p > 1,
+  legend.pars = list(),
+  ...
+)
 }
 \arguments{
 \item{x}{\code{mimf} x or array to plot.}

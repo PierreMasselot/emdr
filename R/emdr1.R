@@ -37,6 +37,7 @@
 #'    612, 1018-1029. 
 #'
 #' @examples
+#'
 #'    library(dlnm)
 #'    
 #'    # Predictor decomposition
@@ -66,6 +67,7 @@
 #'    plot_emdr(matrix(s, ncol = 2, byrow = FALSE), periods = period(cmimfs), 
 #'    show.coef = "nonzero", col = c("red", "blue"), pch = 16:17)
 #'    abline(h = 0, lty = 2)
+#'  
 #'
 #' @export
 pimf <- function(x, y, covariates = NULL, tt = attr(x,"tt"), lag = NA, lag.max = 0.5, fill.na = FALSE)

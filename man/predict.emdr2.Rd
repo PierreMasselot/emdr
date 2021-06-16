@@ -4,8 +4,7 @@
 \alias{predict.emdr2}
 \title{Predictions from emdr2}
 \usage{
-\method{predict}{emdr2}(object, newmimfs = NULL, newcovariates = NULL,
-  method = "predict", ...)
+\method{predict}{emdr2}(object, newmimfs = NULL, newcovariates = NULL, method = "predict", ...)
 }
 \arguments{
 \item{object}{An \code{emdr2} object.}

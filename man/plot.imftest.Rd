@@ -4,11 +4,25 @@
 \alias{plot.imftest}
 \title{Graphical IMF significance test}
 \usage{
-\method{plot}{imftest}(x, level = 0.05, select.var = NULL,
-  select.imf = NULL, alternative = x$alternative, nline = 500,
-  col = "black", col.signif = NULL, pch = 4, pch.signif = 8,
-  imf.names = NULL, col.names = NULL, col.lines = "black",
-  lty.lines = 2, lwd.lines = 1, add = FALSE, ...)
+\method{plot}{imftest}(
+  x,
+  level = 0.05,
+  select.var = NULL,
+  select.imf = NULL,
+  alternative = x$alternative,
+  nline = 500,
+  col = "black",
+  col.signif = NULL,
+  pch = 4,
+  pch.signif = 8,
+  imf.names = NULL,
+  col.names = NULL,
+  col.lines = "black",
+  lty.lines = 2,
+  lwd.lines = 1,
+  add = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{An \code{imftest} x resulting from a call to 

@@ -4,10 +4,20 @@
 \alias{plot_emdr}
 \title{Plot coefficients of EMD-regression}
 \usage{
-plot_emdr(x, periods = NULL, lower = NULL, upper = NULL,
-  ci.args = list(), period.log2 = TRUE, trend.label = "Trend",
-  show.coef = c("all", "nonzero", "significant"), col = NULL,
-  pch = NULL, line.pars = list(), ...)
+plot_emdr(
+  x,
+  periods = NULL,
+  lower = NULL,
+  upper = NULL,
+  ci.args = list(),
+  period.log2 = TRUE,
+  trend.label = "Trend",
+  show.coef = c("all", "nonzero", "significant"),
+  col = NULL,
+  pch = NULL,
+  line.pars = list(),
+  ...
+)
 }
 \arguments{
 \item{x}{The coefficient matrix to plot. Can also contain sensitivities

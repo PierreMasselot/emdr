@@ -4,10 +4,20 @@
 \alias{memd}
 \title{Multivariate empirical mode decomposition}
 \usage{
-memd(x, tt = 1:nrow(x), ndirections = 64, stopping = c("absmean",
-  "S"), tol = c(0.075, 0.075, 0.75), max.iter = 50, max.mimfs = NULL,
-  l = 0, Ne = 1, wn.power = 0.02, keep.noise = FALSE,
-  memd.stop = ifelse(p > 1, 3, 2))
+memd(
+  x,
+  tt = 1:NROW(x),
+  ndirections = 64,
+  stopping = c("absmean", "S"),
+  tol = c(0.075, 0.075, 0.75),
+  max.iter = 50,
+  max.mimfs = NULL,
+  l = 0,
+  Ne = 1,
+  wn.power = 0.02,
+  keep.noise = FALSE,
+  memd.stop = ifelse(p + l > 1, 3, 2)
+)
 }
 \arguments{
 \item{x}{A numeric matrix containing the multivariate signal. Each column 
@@ -117,7 +127,7 @@ The EMD algorithm iteratively estimates IMF beginning with the
    
    # EMD
    imfs <- memd(X[,1])
-
+   
    # EEMD
    imfs <- memd(X[,1], Ne = 100, wn.power = .05)
    
@@ -126,7 +136,7 @@ The EMD algorithm iteratively estimates IMF beginning with the
    
    # NA-MEMD
    imfs <- memd(X, l = 2, wn.power = .02) # Takes a couple of minutes
-
+   
    # Plot resulting (M)IMFs
    plot(imfs)
 

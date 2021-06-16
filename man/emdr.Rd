@@ -3,7 +3,6 @@
 \docType{package}
 \name{emdr}
 \alias{emdr}
-\alias{emdr-package}
 \title{emdr: Empirical mode decomposition based regression}
 \description{
 The \code{emdr} package provides functions to decompose time series through
